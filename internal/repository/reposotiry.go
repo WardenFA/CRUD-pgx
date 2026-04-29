@@ -94,4 +94,12 @@ func (r *TaskRepository) UpdateTaskStatus(ctx context.Context, id int, completed
 	return task, nil
 }
 
-// DELETE
+func (r *TaskRepository) DeleteTask(ctx context.Context, id int) (model.Task, error) {
+	var task model.Task
+	err := r.pool.QueryRow(ctx, `DELETE * FROM tasks WHERE id =$1 RETURNING *`, id).Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id)
+	if err != nil {
+		log.Println(err)
+		return model.Task{}, err
+	}
+	return task, err
+}
