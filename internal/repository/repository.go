@@ -22,6 +22,15 @@ type UserRepository struct {
 	pool *pgxpool.Pool
 }
 
+// Добавляем конструкторы для сборки в main
+func NewTaskRepository(pool *pgxpool.Pool) *TaskRepository {
+	return &TaskRepository{pool: pool}
+}
+
+func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
+	return &UserRepository{pool: pool}
+}
+
 // реализация CRUD
 
 func (r *TaskRepository) CreateTask(ctx context.Context, title string, user_id int) (model.Task, error) {
@@ -55,9 +64,9 @@ func (r *TaskRepository) ListTasks(ctx context.Context) ([]model.Task, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var task model.Task
-		if err := rows.Scan(&task.ID, &task.Title, &task.Completed, &task.User_id); err != nil {
+		if err := rows.Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id); err != nil {
 			log.Println(err)
-			return TaskSlice, nil
+			return TaskSlice, err
 		}
 		TaskSlice = append(TaskSlice, task)
 	}
@@ -235,11 +244,11 @@ func (r *UserRepository) DeleteUser(ctx context.Context, id int) (model.User, er
 		// не прерываем, потому что у пользователя действительно может не быть задач
 	}
 	var u model.User
-	err = tx.QueryRow(ctx, `DELETE * FROM users WHERE id = $1 RETURNING *`, id).Scan(&u.ID, &u.Email, &u.Created_at)
+	err = tx.QueryRow(ctx, `DELETE FROM users WHERE id = $1 RETURNING *`, id).Scan(&u.ID, &u.Email, &u.Created_at)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			log.Println("User not found:", err)
-			return model.User{}, err
+			return model.User{}, apperrors.ErrNotFound
 		}
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
