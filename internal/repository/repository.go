@@ -40,15 +40,12 @@ func (r *TaskRepository) CreateTask(ctx context.Context, title string, user_id i
 		var pgErr *pgconn.PgError // обработка ошибки по коду
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23503" {
-				log.Println(apperrors.ErrForeignKey)
-				return model.Task{}, apperrors.ErrForeignKey
+				return model.Task{}, apperrors.ErrInvalidInput
 			}
 			if pgErr.Code == "23502" {
-				log.Println(apperrors.ErrNullViolation)
-				return model.Task{}, apperrors.ErrNullViolation
+				return model.Task{}, apperrors.ErrInvalidInput
 			}
 		}
-		log.Println(err)
 		return model.Task{}, err
 	}
 	return task, nil
@@ -58,21 +55,18 @@ func (r *TaskRepository) ListTasks(ctx context.Context) ([]model.Task, error) {
 	var TaskSlice []model.Task
 	rows, err := r.pool.Query(ctx, `SELECT id, title, completed, user_id FROM tasks`)
 	if err != nil {
-		log.Println(err)
 		return TaskSlice, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var task model.Task
 		if err := rows.Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id); err != nil {
-			log.Println(err)
 			return TaskSlice, err
 		}
 		TaskSlice = append(TaskSlice, task)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Println(err)
 		return TaskSlice, err
 	}
 	return TaskSlice, nil
@@ -88,10 +82,8 @@ func (r *TaskRepository) GetTaskByID(ctx context.Context, id int) (model.Task, e
 	// обрабатываем ошибку через cmdTag.RowsAffected
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Println("Task not found")
 			return model.Task{}, apperrors.ErrNotFound
 		}
-		log.Println(err)
 		return model.Task{}, err
 	}
 	return task, nil
@@ -102,17 +94,14 @@ func (r *TaskRepository) UpdateTaskStatus(ctx context.Context, id int, completed
 	err := r.pool.QueryRow(ctx, `UPDATE tasks SET completed = $1 WHERE id=$2 RETURNING id, title, completed, user_id`, completed, id).Scan(&task.ID, &task.Title, &task.Completed, &task.User_id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Println("Task not found")
 			return model.Task{}, apperrors.ErrNotFound
 		}
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23502" {
-				log.Println(apperrors.ErrNullViolation)
-				return model.Task{}, apperrors.ErrNullViolation
+				return model.Task{}, apperrors.ErrInvalidInput
 			}
 		}
-		log.Println(err)
 		return model.Task{}, err
 	}
 	return task, nil
@@ -123,10 +112,8 @@ func (r *TaskRepository) DeleteTask(ctx context.Context, id int) (model.Task, er
 	err := r.pool.QueryRow(ctx, `DELETE FROM tasks WHERE id =$1 RETURNING *`, id).Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Println("Task not found")
 			return model.Task{}, apperrors.ErrNotFound
 		}
-		log.Println(err)
 		return model.Task{}, err
 	}
 	return task, err
@@ -140,15 +127,12 @@ func (r *UserRepository) CreateUser(ctx context.Context, email string) (model.Us
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23502" {
-				log.Println(apperrors.ErrNullViolation)
-				return model.User{}, apperrors.ErrNullViolation
+				return model.User{}, apperrors.ErrInvalidInput
 			}
 			if pgErr.Code == "23505" {
-				log.Println(apperrors.ErrUsedEmail)
-				return model.User{}, apperrors.ErrUsedEmail
+				return model.User{}, apperrors.ErrAlreadyExists
 			}
 		}
-		log.Println(err)
 		return model.User{}, err
 	}
 	return u, nil
@@ -158,7 +142,6 @@ func (r *UserRepository) ListUsers(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	rows, err := r.pool.Query(ctx, `SELECT id, email FROM users`)
 	if err != nil {
-		log.Println(err)
 		return users, err
 	}
 	defer rows.Close()
@@ -167,14 +150,12 @@ func (r *UserRepository) ListUsers(ctx context.Context) ([]model.User, error) {
 		var u model.User
 		err := rows.Scan(&u.ID, &u.Email)
 		if err != nil {
-			log.Println(err)
 			return users, err
 		}
 		users = append(users, u)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Println(err)
 		return users, err
 	}
 
@@ -186,10 +167,8 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int) (model.User, e
 	err := r.pool.QueryRow(ctx, `SELECT id, email FROM users WHERE id=$1`, id).Scan(&u.ID, &u.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Println("User not found")
 			return model.User{}, apperrors.ErrNotFound
 		}
-		log.Println(err)
 		return model.User{}, err
 	}
 	return u, nil
@@ -200,21 +179,17 @@ func (r *UserRepository) UpdateUser(ctx context.Context, email string, id int) (
 	err := r.pool.QueryRow(ctx, `UPDATE users SET email = $1 WHERE id = $2 RETURNING *`, email, id).Scan(&u.ID, &u.Email, &u.Created_at)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Println("User not found")
 			return model.User{}, apperrors.ErrNotFound
 		}
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23502" {
-				log.Println(apperrors.ErrNullViolation)
-				return model.User{}, apperrors.ErrNullViolation
+				return model.User{}, apperrors.ErrInvalidInput
 			}
 			if pgErr.Code == "23505" {
-				log.Println(apperrors.ErrUsedEmail)
-				return model.User{}, apperrors.ErrUsedEmail
+				return model.User{}, apperrors.ErrAlreadyExists
 			}
 		}
-		log.Println(err)
 		return model.User{}, err
 	}
 
@@ -228,36 +203,31 @@ func (r *UserRepository) DeleteUser(ctx context.Context, id int) (model.User, er
 	// открывает транзакцию
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
-		log.Println(err)
 		return model.User{}, err
 	}
 	defer tx.Rollback(ctx)
 	// удаляем задачи
 	cmdTag, err := tx.Exec(ctx, `DELETE FROM tasks WHERE user_id = $1`, id) // принимает cmdTag (узнай подробнее что это) (UPD: возвращает что-то типа DELETE 0 1 как в консоли с SQL)
 	if err != nil {
-		log.Println(err)
 		return model.User{}, err
 	}
 	// ошибка отсутствия изменений в Exec обрабатывается через cmdTag
 	if cmdTag.RowsAffected() == 0 {
-		log.Println("No tasks")
+		log.Println("No data")
 		// не прерываем, потому что у пользователя действительно может не быть задач
 	}
 	var u model.User
 	err = tx.QueryRow(ctx, `DELETE FROM users WHERE id = $1 RETURNING *`, id).Scan(&u.ID, &u.Email, &u.Created_at)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Println("User not found:", err)
 			return model.User{}, apperrors.ErrNotFound
 		}
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23503" {
-				log.Println(apperrors.ErrForeignKey)
-				return model.User{}, apperrors.ErrForeignKey
+				return model.User{}, apperrors.ErrInvalidInput
 			}
 		}
-		log.Println(err)
 		return model.User{}, err
 	}
 	return u, tx.Commit(ctx)

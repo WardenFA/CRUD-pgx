@@ -2,10 +2,10 @@ package apperrors
 
 import "errors"
 
-// кастомные ошибки
+// Кастомные общие ошибки, понятные всему приложению
 var (
-	ErrNotFound      = errors.New("data not found")
-	ErrUsedEmail     = errors.New("email is already used")
-	ErrForeignKey    = errors.New("foreign key error")
-	ErrNullViolation = errors.New("must be not null")
+	ErrNotFound      = errors.New("not found")
+	ErrInvalidInput  = errors.New("invalid input")
+	ErrAlreadyExists = errors.New("already exists")
+	ErrConflict      = errors.New("conflict")
 )
