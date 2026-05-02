@@ -5,15 +5,15 @@ import (
 )
 
 type Task struct {
-	ID         int
-	Title      string
-	Completed  bool
-	Created_at time.Time
-	User_id    int
+	ID         int       `json:"id"`
+	Title      string    `json:"title"`
+	Completed  bool      `json:"completed"`
+	Created_at time.Time `json:"created_at"`
+	User_id    int       `json:"user_id"`
 }
 
 type User struct {
-	ID         int
-	Email      string
-	Created_at time.Time
+	ID         int       `json:"id"`
+	Email      string    `json:"email"`
+	Created_at time.Time `json:"created_at"`
 }

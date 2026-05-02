@@ -6,12 +6,12 @@ import (
 )
 
 type response struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Success bool   `json:"success"`
+	Data    any    `json:"data,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
 
-func writeJSON(w http.ResponseWriter, status int, data interface{}) {
+func writeJSON(w http.ResponseWriter, status int, data any) {
 	// единый формат успешного JSON-ответа во всём API.
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

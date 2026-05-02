@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"time"
 
 	"crud-pgx/internal/db"
@@ -23,4 +24,10 @@ func main() {
 		log.Fatal("ping error: ", err)
 	}
 
+	go func() {
+		if err := http.ListenAndServe(":8080", nil); err != nil {
+			log.Println("internal server error")
+			return
+		}
+	}()
 }

@@ -13,6 +13,7 @@ type TaskService struct {
 }
 
 func (s *TaskService) CreateTask(ctx context.Context, title string, user_id int) (model.Task, error) {
+	title = strings.TrimSpace(title)
 	if title == "" {
 		return model.Task{}, apperrors.ErrInvalidInput
 	}
@@ -53,6 +54,7 @@ type UserService struct {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, email string) (model.User, error) {
+	email = strings.TrimSpace(email)
 	if !strings.Contains(email, "@") || email == "" {
 		return model.User{}, apperrors.ErrInvalidInput
 	}
@@ -71,6 +73,7 @@ func (s *UserService) GetUserByID(ctx context.Context, id int) (model.User, erro
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, email string, id int) (model.User, error) {
+	email = strings.TrimSpace(email)
 	if email == "" || !strings.Contains(email, "@") || id <= 0 {
 		return model.User{}, apperrors.ErrInvalidInput
 	}
