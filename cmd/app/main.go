@@ -7,6 +7,9 @@ import (
 	"time"
 
 	"crud-pgx/internal/db"
+	"crud-pgx/internal/handler"
+	"crud-pgx/internal/repository"
+	"crud-pgx/internal/service"
 )
 
 func main() {
@@ -30,4 +33,27 @@ func main() {
 			return
 		}
 	}()
+
+	// сборка
+	TaskRepository := repository.NewTaskRepository(pool)
+	UserRepository := repository.NewUserRepository(pool)
+
+	TaskService := service.NewTaskService(TaskRepository)
+	UserService := service.NewUserService(UserRepository)
+
+	TaskHandler := handler.NewTaskHandler(TaskService)
+	UserHandler := handler.NewUserHandler(UserService)
+
+	//роуты
+	http.HandleFunc("task/create", TaskHandler.CreateTask)
+	http.HandleFunc("task/list", TaskHandler.ListTasks)
+	http.HandleFunc("task/get", TaskHandler.GetTaskByID)
+	http.HandleFunc("task/update", TaskHandler.UpdateTaskStatus)
+	http.HandleFunc("task/delete", TaskHandler.DeleteTask)
+
+	http.HandleFunc("user/create", UserHandler.CreateUser)
+	http.HandleFunc("user/list", UserHandler.ListUsers)
+	http.HandleFunc("user/get", UserHandler.GetUserByID)
+	http.HandleFunc("user/update", UserHandler.UpdateUser)
+	http.HandleFunc("user/delete", UserHandler.DeleteUser)
 }
