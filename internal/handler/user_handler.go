@@ -16,6 +16,10 @@ type UserHandler struct {
 	service *service.UserService
 }
 
+func NewUserHandler(service *service.UserService) *UserHandler {
+	return &UserHandler{service: service}
+}
+
 // остановился тут
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ct := r.Header.Get("Content-Type")

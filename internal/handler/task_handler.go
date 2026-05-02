@@ -16,6 +16,10 @@ type TaskHandler struct {
 	service *service.TaskService
 }
 
+func NewTaskHandler(service *service.TaskService) *TaskHandler {
+	return &TaskHandler{service: service}
+}
+
 func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	ct := r.Header.Get("Content-Type")
 	if !strings.HasPrefix(ct, "application/json") {
