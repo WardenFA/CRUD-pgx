@@ -8,6 +8,7 @@ import (
 
 	"crud-pgx/internal/db"
 	"crud-pgx/internal/handler"
+	"crud-pgx/internal/middleware"
 	"crud-pgx/internal/repository"
 	"crud-pgx/internal/service"
 )
@@ -27,13 +28,6 @@ func main() {
 		log.Fatal("ping error: ", err)
 	}
 
-	go func() {
-		if err := http.ListenAndServe(":8080", nil); err != nil {
-			log.Println("internal server error")
-			return
-		}
-	}()
-
 	// сборка
 	TaskRepository := repository.NewTaskRepository(pool)
 	UserRepository := repository.NewUserRepository(pool)
@@ -45,15 +39,18 @@ func main() {
 	UserHandler := handler.NewUserHandler(UserService)
 
 	//роуты
-	http.HandleFunc("task/create", TaskHandler.CreateTask)
-	http.HandleFunc("task/list", TaskHandler.ListTasks)
-	http.HandleFunc("task/get", TaskHandler.GetTaskByID)
-	http.HandleFunc("task/update", TaskHandler.UpdateTaskStatus)
-	http.HandleFunc("task/delete", TaskHandler.DeleteTask)
+	http.Handle("/task/create", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodPost)(TaskHandler.CreateTask)))
+	http.Handle("/task/list", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodGet)(TaskHandler.ListTasks)))
+	http.Handle("/task/get", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodGet)(TaskHandler.GetTaskByID)))
+	http.Handle("/task/update", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodPatch)(TaskHandler.UpdateTaskStatus)))
+	http.Handle("/task/delete", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodDelete)(TaskHandler.DeleteTask)))
 
-	http.HandleFunc("user/create", UserHandler.CreateUser)
-	http.HandleFunc("user/list", UserHandler.ListUsers)
-	http.HandleFunc("user/get", UserHandler.GetUserByID)
-	http.HandleFunc("user/update", UserHandler.UpdateUser)
-	http.HandleFunc("user/delete", UserHandler.DeleteUser)
+	http.Handle("/user/create", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodPost)(UserHandler.CreateUser)))
+	http.Handle("/user/list", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodGet)(UserHandler.ListUsers)))
+	http.Handle("/user/get", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodGet)(UserHandler.GetUserByID)))
+	http.Handle("/user/update", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodPatch)(UserHandler.UpdateUser)))
+	http.Handle("/user/delete", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodDelete)(UserHandler.DeleteUser)))
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
 }

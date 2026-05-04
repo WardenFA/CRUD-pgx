@@ -11,14 +11,14 @@ type response struct {
 	Error   string `json:"error,omitempty"`
 }
 
-func writeJSON(w http.ResponseWriter, status int, data any) {
+func WriteJSON(w http.ResponseWriter, status int, data any) {
 	// единый формат успешного JSON-ответа во всём API.
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(response{Success: true, Data: data})
 }
 
-func writeError(w http.ResponseWriter, status int, err error) {
+func WriteError(w http.ResponseWriter, status int, err error) {
 	// единый формат ошибки
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
