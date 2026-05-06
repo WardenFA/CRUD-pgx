@@ -43,7 +43,7 @@ func (r *TaskRepository) CreateTask(ctx context.Context, title string, user_id i
 
 func (r *TaskRepository) ListTasks(ctx context.Context) ([]model.Task, error) {
 	var TaskSlice []model.Task
-	rows, err := r.pool.Query(ctx, `SELECT id, title, completed, created_at, user_id FROM tasks`)
+	rows, err := r.pool.Query(ctx, `SELECT id, title, completed, created_at, user_id FROM tasks ORDER BY id`)
 	if err != nil {
 		return TaskSlice, err
 	}
@@ -64,7 +64,7 @@ func (r *TaskRepository) ListTasks(ctx context.Context) ([]model.Task, error) {
 
 func (r *TaskRepository) GetTaskByID(ctx context.Context, id int) (model.Task, error) {
 	var task model.Task
-	err := r.pool.QueryRow(ctx, `SELECT * FROM tasks WHERE id = $1`, id).Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id)
+	err := r.pool.QueryRow(ctx, `SELECT id, title, completed, created_at, user_id FROM tasks WHERE id = $1`, id).Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id)
 	// Правило обработки ошибок с использованием QueryRow. Конкретно ошибка NotFound.
 	// Если мы используем QueryRow и запрос с RETURNING (Не распространяется на SELECT,
 	// так как он уже и так возвращает данные) - нам стоит обработать ошибку через

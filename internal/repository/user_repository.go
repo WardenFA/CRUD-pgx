@@ -42,7 +42,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, email string) (model.Us
 
 func (r *UserRepository) ListUsers(ctx context.Context) ([]model.User, error) {
 	var users []model.User
-	rows, err := r.pool.Query(ctx, `SELECT id, email FROM users`)
+	rows, err := r.pool.Query(ctx, `SELECT id, email, created_at FROM users ORDER BY id`) // лучше явно указать все поля чем SELECT *
 	if err != nil {
 		return users, err
 	}
@@ -50,7 +50,7 @@ func (r *UserRepository) ListUsers(ctx context.Context) ([]model.User, error) {
 
 	for rows.Next() {
 		var u model.User
-		err := rows.Scan(&u.ID, &u.Email)
+		err := rows.Scan(&u.ID, &u.Email, &u.Created_at)
 		if err != nil {
 			return users, err
 		}
