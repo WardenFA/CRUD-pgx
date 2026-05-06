@@ -17,3 +17,32 @@ type User struct {
 	Email      string    `json:"email"`
 	Created_at time.Time `json:"created_at"`
 }
+
+// DTO модели
+
+// tasks
+
+// "/task/create"
+type CreateTaskRequest struct {
+	Title   string `json:"title"`
+	User_id int    `json:"user_id"`
+}
+
+// "/task/update"
+type UpdateTaskRequest struct {
+	ID        int  `json:"id"`
+	Completed bool `json:"completed"`
+}
+
+// users
+
+// "/user/create"
+type CreateUserRequest struct {
+	Email string `json:"email"`
+}
+
+// "/user/update"
+type UpdateUserRequest struct {
+	Email string `json:"email"`
+	ID    int    `json:"id"`
+}

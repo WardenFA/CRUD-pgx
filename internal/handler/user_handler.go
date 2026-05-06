@@ -28,8 +28,9 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, http.StatusUnsupportedMediaType, errors.New("invalid content type"))
 		return
 	}
-	var user model.User
+	var user model.CreateUserRequest
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&user); err != nil {
 		log.Println("invalid JSON")
 		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))
@@ -101,8 +102,9 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user model.User
+	var user model.UpdateUserRequest
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&user); err != nil {
 		log.Println("invalid json")
 		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))

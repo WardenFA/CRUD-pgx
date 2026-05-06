@@ -27,8 +27,9 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, http.StatusUnsupportedMediaType, errors.New("invalid content type"))
 		return
 	}
-	var task model.Task
+	var task model.CreateTaskRequest
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&task); err != nil {
 		log.Println("invalid JSON")
 		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))
@@ -96,8 +97,9 @@ func (h *TaskHandler) UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var task model.Task
+	var task model.UpdateTaskRequest
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&task); err != nil {
 		log.Println("invalid json")
 		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))
