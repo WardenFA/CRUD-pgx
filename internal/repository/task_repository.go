@@ -43,7 +43,7 @@ func (r *TaskRepository) CreateTask(ctx context.Context, title string, user_id i
 
 func (r *TaskRepository) ListTasks(ctx context.Context) ([]model.Task, error) {
 	var TaskSlice []model.Task
-	rows, err := r.pool.Query(ctx, `SELECT id, title, completed, created_at user_id FROM tasks`)
+	rows, err := r.pool.Query(ctx, `SELECT id, title, completed, created_at, user_id FROM tasks`)
 	if err != nil {
 		return TaskSlice, err
 	}
