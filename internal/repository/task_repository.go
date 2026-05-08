@@ -99,7 +99,7 @@ func (r *TaskRepository) UpdateTaskStatus(ctx context.Context, id int, completed
 
 func (r *TaskRepository) DeleteTask(ctx context.Context, id int) (model.Task, error) {
 	var task model.Task
-	err := r.pool.QueryRow(ctx, `DELETE FROM tasks WHERE id =$1 RETURNING *`, id).Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id)
+	err := r.pool.QueryRow(ctx, `DELETE FROM tasks WHERE id =$1 RETURNING id, title, completed, created_at, user_id`, id).Scan(&task.ID, &task.Title, &task.Completed, &task.Created_at, &task.User_id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.Task{}, apperrors.ErrNotFound

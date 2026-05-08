@@ -23,7 +23,7 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 
 func (r *UserRepository) CreateUser(ctx context.Context, email string) (model.User, error) {
 	var u model.User
-	err := r.pool.QueryRow(ctx, `INSERT INTO users(email) VALUES($1) RETURNING *`, email).Scan(&u.ID, &u.Email, &u.Created_at)
+	err := r.pool.QueryRow(ctx, `INSERT INTO users(email) VALUES($1) RETURNING id, email, created_at`, email).Scan(&u.ID, &u.Email, &u.Created_at)
 	if err != nil {
 		// нет ошибки с несуществующим пользователем так как мы его вставляем
 		var pgErr *pgconn.PgError
@@ -78,7 +78,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int) (model.User, e
 
 func (r *UserRepository) UpdateUser(ctx context.Context, email string, id int) (model.User, error) {
 	var u model.User
-	err := r.pool.QueryRow(ctx, `UPDATE users SET email = $1 WHERE id = $2 RETURNING *`, email, id).Scan(&u.ID, &u.Email, &u.Created_at)
+	err := r.pool.QueryRow(ctx, `UPDATE users SET email = $1 WHERE id = $2 RETURNING id, email, created_at`, email, id).Scan(&u.ID, &u.Email, &u.Created_at)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.User{}, apperrors.ErrNotFound
@@ -119,7 +119,7 @@ func (r *UserRepository) DeleteUser(ctx context.Context, id int) (model.User, er
 		// не прерываем, потому что у пользователя действительно может не быть задач
 	}
 	var u model.User
-	err = tx.QueryRow(ctx, `DELETE FROM users WHERE id = $1 RETURNING *`, id).Scan(&u.ID, &u.Email, &u.Created_at)
+	err = tx.QueryRow(ctx, `DELETE FROM users WHERE id = $1 RETURNING id, email, created_at`, id).Scan(&u.ID, &u.Email, &u.Created_at)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.User{}, apperrors.ErrNotFound
