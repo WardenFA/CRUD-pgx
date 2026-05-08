@@ -50,7 +50,16 @@ func main() {
 	http.Handle("/user/get", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodGet)(UserHandler.GetUserByID)))
 	http.Handle("/user/update", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodPatch)(UserHandler.UpdateUser)))
 	http.Handle("/user/delete", middleware.LoggingMiddleWare(middleware.MethodMiddleware(http.MethodDelete)(UserHandler.DeleteUser)))
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	srv := &http.Server{
+		Addr:              ":8080",
+		Handler:           nil,
+		ReadHeaderTimeout: 5 * time.Second,  // защита от slowloris атак
+		ReadTimeout:       10 * time.Second, // ограничение на время запроса от клиента
+		WriteTimeout:      10 * time.Second, // ограничение на написание ответа сервером
+		IdleTimeout:       60 * time.Second, // чтобы не держать пуустые соединения долго
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
