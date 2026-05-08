@@ -30,7 +30,7 @@ func (r *TaskRepository) CreateTask(ctx context.Context, title string, user_id i
 		var pgErr *pgconn.PgError // обработка ошибки по коду
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23503" {
-				return model.Task{}, apperrors.ErrInvalidInput
+				return model.Task{}, apperrors.ErrNotFound // bugfix (раньше была ErrInvaidInput, если не обнаружен нужный юзер)
 			}
 			if pgErr.Code == "23502" {
 				return model.Task{}, apperrors.ErrInvalidInput
