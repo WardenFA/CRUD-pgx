@@ -42,6 +42,10 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 			log.Println("invalid input data")
 			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
 			return
+		case apperrors.ErrNotFound:
+			log.Println("user not found")
+			WriteError(w, http.StatusNotFound, apperrors.ErrNotFound)
+			return
 		default:
 			log.Println("internal error")
 			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
