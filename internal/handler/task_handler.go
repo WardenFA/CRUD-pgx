@@ -56,11 +56,41 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TaskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := h.service.ListTasks(r.Context())
+	// создаем дефолтные значения, если запрос передан без доп ключей
+	limit := 20
+	offset := 0
+
+	if queryLimit := r.URL.Query().Get("limit"); queryLimit != "" {
+		parsedLimit, err := strconv.Atoi(queryLimit)
+		if err != nil {
+			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
+			return
+		}
+		limit = parsedLimit
+	}
+
+	if queryOffset := r.URL.Query().Get("offset"); queryOffset != "" {
+		parsedOffset, err := strconv.Atoi(queryOffset)
+		if err != nil {
+			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
+			return
+		}
+		offset = parsedOffset
+	}
+
+	tasks, err := h.service.ListTasks(r.Context(), limit, offset)
 	if err != nil {
-		log.Println("internal error")
-		WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
-		return
+		switch err {
+		case apperrors.ErrInvalidInput:
+			log.Println("invalid input")
+			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
+			return
+
+		default:
+			log.Println("internal error")
+			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			return
+		}
 	}
 	WriteJSON(w, http.StatusOK, tasks)
 }

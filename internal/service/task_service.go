@@ -28,8 +28,11 @@ func (s *TaskService) CreateTask(ctx context.Context, title string, user_id int)
 	return s.repo.CreateTask(ctx, title, user_id)
 }
 
-func (s *TaskService) ListTasks(ctx context.Context) ([]model.Task, error) {
-	return s.repo.ListTasks(ctx)
+func (s *TaskService) ListTasks(ctx context.Context, limit, offset int) ([]model.Task, error) {
+	if limit <= 0 || offset < 0 {
+		return []model.Task{}, apperrors.ErrInvalidInput
+	}
+	return s.repo.ListTasks(ctx, limit, offset)
 }
 
 func (s *TaskService) GetTaskByID(ctx context.Context, id int) (model.Task, error) {
