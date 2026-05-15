@@ -46,3 +46,11 @@ type UpdateUserRequest struct {
 	Email string `json:"email"`
 	ID    int    `json:"id"`
 }
+
+// Структура для фильтра litsTasks
+type TaskFilter struct {
+	Limit     int
+	Offset    int
+	Completed *bool // используем адрес, потому что пользователь может не использовать фильтр
+	User_id   *int  // тоже самое
+}

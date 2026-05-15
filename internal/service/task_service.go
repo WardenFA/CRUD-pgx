@@ -28,11 +28,14 @@ func (s *TaskService) CreateTask(ctx context.Context, title string, user_id int)
 	return s.repo.CreateTask(ctx, title, user_id)
 }
 
-func (s *TaskService) ListTasks(ctx context.Context, limit, offset int) ([]model.Task, error) {
-	if limit <= 0 || offset < 0 {
+func (s *TaskService) ListTasks(ctx context.Context, filter model.TaskFilter) ([]model.Task, error) {
+	if filter.Limit <= 0 || filter.Offset < 0 {
 		return []model.Task{}, apperrors.ErrInvalidInput
 	}
-	return s.repo.ListTasks(ctx, limit, offset)
+	if *filter.User_id < 0 {
+		return []model.Task{}, apperrors.ErrInvalidInput
+	}
+	return s.repo.ListTasks(ctx, filter)
 }
 
 func (s *TaskService) GetTaskByID(ctx context.Context, id int) (model.Task, error) {

@@ -57,8 +57,10 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 func (h *TaskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
 	// создаем дефолтные значения, если запрос передан без доп ключей
-	limit := 20
-	offset := 0
+	filter := model.TaskFilter{
+		Limit:  20,
+		Offset: 0,
+	}
 
 	if queryLimit := r.URL.Query().Get("limit"); queryLimit != "" {
 		parsedLimit, err := strconv.Atoi(queryLimit)
@@ -66,7 +68,7 @@ func (h *TaskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
 			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
 			return
 		}
-		limit = parsedLimit
+		filter.Limit = parsedLimit
 	}
 
 	if queryOffset := r.URL.Query().Get("offset"); queryOffset != "" {
@@ -75,10 +77,30 @@ func (h *TaskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
 			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
 			return
 		}
-		offset = parsedOffset
+		filter.Offset = parsedOffset
 	}
 
-	tasks, err := h.service.ListTasks(r.Context(), limit, offset)
+	if queryCompleted := r.URL.Query().Get("completed"); queryCompleted != "" {
+		parsedCompleted, err := strconv.ParseBool(queryCompleted)
+		if err != nil {
+			log.Println("invalid input")
+			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
+			return
+		}
+		filter.Completed = &parsedCompleted
+	}
+
+	if queryUserID := r.URL.Query().Get("user_id"); queryUserID != "" {
+		parsedUserID, err := strconv.Atoi(queryUserID)
+		if err != nil {
+			log.Println("invalid input")
+			WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
+			return
+		}
+		filter.User_id = &parsedUserID
+	}
+
+	tasks, err := h.service.ListTasks(r.Context(), filter)
 	if err != nil {
 		switch err {
 		case apperrors.ErrInvalidInput:
