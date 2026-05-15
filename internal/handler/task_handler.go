@@ -32,7 +32,7 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&task); err != nil {
 		log.Println("invalid JSON")
-		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))
+		WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
 		return
 	}
 	madeTask, err := h.service.CreateTask(r.Context(), task.Title, task.User_id)
@@ -48,7 +48,7 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}
@@ -88,7 +88,7 @@ func (h *TaskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
 
 		default:
 			log.Println("internal error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}
@@ -116,7 +116,7 @@ func (h *TaskHandler) GetTaskByID(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}
@@ -136,7 +136,7 @@ func (h *TaskHandler) UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&task); err != nil {
 		log.Println("invalid json")
-		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))
+		WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
 		return
 	}
 	updatedTask, err := h.service.UpdateTaskStatus(r.Context(), task.ID, task.Completed)
@@ -152,7 +152,7 @@ func (h *TaskHandler) UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}
@@ -180,7 +180,7 @@ func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal server error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}

@@ -33,7 +33,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&user); err != nil {
 		log.Println("invalid JSON")
-		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))
+		WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
 		return
 	}
 	newUser, err := h.service.CreateUser(r.Context(), user.Email)
@@ -49,7 +49,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}
@@ -60,7 +60,7 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.service.ListUsers(r.Context())
 	if err != nil {
 		log.Println("internal error")
-		WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+		WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 		return
 	}
 	WriteJSON(w, http.StatusOK, users)
@@ -87,7 +87,7 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}
@@ -107,7 +107,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields() // отключаем лишние поля для DTO
 	if err := decoder.Decode(&user); err != nil {
 		log.Println("invalid json")
-		WriteError(w, http.StatusBadRequest, errors.New("invalid json"))
+		WriteError(w, http.StatusBadRequest, apperrors.ErrInvalidInput)
 		return
 	}
 	updatedUser, err := h.service.UpdateUser(r.Context(), user.Email, user.ID)
@@ -127,7 +127,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}
@@ -155,7 +155,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			log.Println("internal server error")
-			WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+			WriteError(w, http.StatusInternalServerError, apperrors.ErrInternal)
 			return
 		}
 	}

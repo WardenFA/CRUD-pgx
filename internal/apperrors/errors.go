@@ -8,4 +8,5 @@ var (
 	ErrInvalidInput  = errors.New("invalid input")
 	ErrAlreadyExists = errors.New("already exists")
 	ErrConflict      = errors.New("conflict")
+	ErrInternal      = errors.New("internal error")
 )
